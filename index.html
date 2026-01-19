@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tiến Lên</title>
+    <link rel="icon" type="image/jpeg"
+        href="https://is2-ssl.mzstatic.com/image/thumb/Purple124/v4/bd/1b/d0/bd1bd09f-7b6c-7cb1-1701-3a30bfaa4fe8/source/512x512bb.jpg">
+
+    <style>
+        :root {
+            --win: #27ae60;
+            --lose: #e74c3c;
+            --dark: #2c3e50;
+            --primary-bg: #6c5ce7;
+            --header-white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            /* Ngăn chặn cuộn ngang trên điện thoại */
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        .main-header {
+            background: var(--header-white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .menu-icon {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            width: 18px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .menu-icon span {
+            width: 4px;
+            height: 4px;
+            background: var(--dark);
+            border-radius: 1px;
+        }
+
+        .avatar-box {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .avatar-box img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            white-space: nowrap;
+        }
+
+        /* --- LAYOUT THÍCH ỨNG --- */
+        .container {
+            padding: 12px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            color: var(--dark);
+            border-left: 4px solid var(--primary-bg);
+            padding-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form nhập liệu trên Mobile */
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #7f8c8d;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            /* Xóa style mặc định trên iOS */
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-bg);
+        }
+
+        /* Bảng cuộn ngang mượt mà trên Mobile */
+        .scroll-x {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Cuộn mượt trên iOS */
+            margin: 0 -5px;
+            padding: 0 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+            /* Đảm bảo bảng không bị quá hẹp */
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #636e72;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            border: 1px solid #f1f2f6;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        /* Nút bấm lớn dễ chạm trên điện thoại */
+        .btn {
+            background: var(--primary-bg);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .score-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .history-item {
+            font-size: 13px;
+            padding: 10px;
+            border-bottom: 1px solid #f1f2f6;
+            color: #2d3436;
+        }
+
+        /* Responsive cho màn hình cực nhỏ */
+        @media (max-width: 360px) {
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="menu-icon" title="Chuyển chế độ">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+        </div>
+        <div class="avatar-box">
+            <img src="https://play-lh.googleusercontent.com/Qth-vQNtD3lQvKCjne9ITymdZ0kvxzBR9_KKOlUDaWBzuIxBNWVYmkzj4iil1_RteZk"
+                onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077114.png'" alt="Logo">
+        </div>
+        <div class="header-title" id="current-game-title">Tiến Lên</div>
+    </header>
+
+    <div class="container">
+        <div id="setup-screen" class="card">
+            <h2>Cấu Hình Điểm</h2>
+            <div class="setup-grid">
+                <div class="input-group"><label>Nhất</label><input type="number" id="m_nhat" value="20"></div>
+                <div class="input-group"><label>Nhì</label><input type="number" id="m_nhi" value="10"></div>
+                <div class="input-group"><label>Thua Trắng</label><input type="number" id="m_thuatrang" value="40">
+                </div>
+                <div class="input-group"><label>Mức Heo</label><input type="number" id="m_heo" value="10"></div>
+                <div class="input-group"><label>Mức Tứ Quý</label><input type="number" id="m_tuquy" value="20"></div>
+            </div>
+            <div style="margin-top:10px;">
+                <label>Tên người chơi</label>
+                <div class="setup-grid">
+                    <input type="text" id="p1" value="An">
+                    <input type="text" id="p2" value="Bình">
+                    <input type="text" id="p3" value="Chi">
+                    <input type="text" id="p4" value="Dương">
+                </div>
+            </div>
+            <button class="btn" onclick="startGame()">BẮT ĐẦU CHƠI</button>
+        </div>
+
+        <div id="game-screen" style="display:none;">
+            <div class="card">
+                <h2>Bảng Tổng Điểm</h2>
+                <div class="scroll-x">
+                    <table>
+                        <tr id="player-names"></tr>
+                        <tr id="player-totals"></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Kết Quả Ván</h2>
+                <div class="scroll-x">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Hạng</th>
+                                <th>Ăn</th>
+                                <th>Thối</th>
+                            </tr>
+                        </thead>
+                        <tbody id="input-rows"></tbody>
+                    </table>
+                </div>
+                <button class="btn" onclick="processRound()">XÁC NHẬN VÁN</button>
+            </div>
+
+            <div class="card">
+                <h2>Lịch Sử</h2>
+                <div id="history-log"></div>
+                <button class="btn" style="background:#b2bec3; font-size: 13px; padding: 8px;"
+                    onclick="location.reload()">LÀM MỚI TẤT CẢ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = [], totals = [0, 0, 0, 0], cfg = {}, historyData = [];
+
+        function startGame() {
+            players = [
+                document.getElementById('p1').value,
+                document.getElementById('p2').value,
+                document.getElementById('p3').value,
+                document.getElementById('p4').value
+            ];
+            cfg = {
+                nhat: parseInt(document.getElementById('m_nhat').value),
+                nhi: parseInt(document.getElementById('m_nhi').value),
+                thuatrang: parseInt(document.getElementById('m_thuatrang').value),
+                heo: parseInt(document.getElementById('m_heo').value),
+                tuquy: parseInt(document.getElementById('m_tuquy').value)
+            };
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            renderInputRows();
+            updateDisplay();
+            window.scrollTo(0, 0);
+        }
+
+        function renderInputRows() {
+            let html = '';
+            players.forEach((p, i) => {
+                html += `
+                <tr>
+                    <td><strong>${p}</strong></td>
+                    <td>
+                        <select id="rank-${i}">
+                            <option value="none">-</option>
+                            <option value="nhat">Nhất</option>
+                            <option value="nhi">Nhì</option>
+                            <option value="ba">Ba</option>
+                            <option value="bet">Bét</option>
+                            <option value="toitrang">TỚI TRẮNG</option>
+                            <option value="thuatrang">THUA TRẮNG</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select id="eat-${i}">
+                            <option value="0">0</option>
+                            ${[1, 2, 3, 4].map(n => `<option value="${n * cfg.heo}">${n} Heo</option>`).join('')}
+                            ${[1, 2, 3, 4].map(n => `<option value="${n * cfg.tuquy}">${n} Tứ</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select id="lose-${i}">
+                            <option value="0">0</option>
+                            ${[1, 2, 3, 4].map(n => `<option value="${-n * cfg.heo}">${n} Heo</option>`).join('')}
+                            ${[1, 2, 3, 4].map(n => `<option value="${-n * cfg.tuquy}">${n} Tứ</option>`).join('')}
+                        </select>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('input-rows').innerHTML = html;
+        }
+
+        function processRound() {
+            let roundScores = [0, 0, 0, 0];
+            let winnerIdx = -1;
+            let sumThuaTrang = 0;
+
+            for (let i = 0; i < 4; i++) {
+                let rank = document.getElementById(`rank-${i}`).value;
+                let eat = parseInt(document.getElementById(`eat-${i}`).value);
+                let lose = parseInt(document.getElementById(`lose-${i}`).value);
+                let baseScore = 0;
+
+                if (rank === 'toitrang') winnerIdx = i;
+                else if (rank === 'thuatrang') { baseScore = -cfg.thuatrang; sumThuaTrang += cfg.thuatrang; }
+                else if (rank === 'nhat') baseScore = cfg.nhat;
+                else if (rank === 'nhi') baseScore = cfg.nhi;
+                else if (rank === 'ba') baseScore = -cfg.nhi;
+                else if (rank === 'bet') baseScore = -cfg.nhat;
+
+                roundScores[i] = baseScore + eat + lose;
+            }
+
+            if (winnerIdx !== -1) {
+                let winExtra = parseInt(document.getElementById(`eat-${winnerIdx}`).value) + parseInt(document.getElementById(`lose-${winnerIdx}`).value);
+                roundScores[winnerIdx] = sumThuaTrang + winExtra;
+            }
+
+            roundScores.forEach((s, i) => totals[i] += s);
+            historyData.push([...roundScores]);
+            updateDisplay();
+            renderInputRows();
+            window.scrollTo(0, 0);
+        }
+
+        function updateDisplay() {
+            document.getElementById('player-names').innerHTML = players.map(p => `<th>${p}</th>`).join('');
+            document.getElementById('player-totals').innerHTML = totals.map(s => `
+                <td class="score-total" style="color:${s >= 0 ? 'var(--win)' : 'var(--lose)'}">${s}</td>
+            `).join('');
+
+            let logHtml = historyData.map((r, i) => `
+                <div class="history-item">
+                    <strong>Ván ${i + 1}:</strong> ${r.map((s, idx) => ` ${players[idx]}: ${s > 0 ? '+' + s : s}`).join(' | ')}
+                </div>
+            `).reverse().join('');
+            document.getElementById('history-log').innerHTML = logHtml;
+        }
+    </script>
+</body>
+
+</html>
